@@ -1,0 +1,22 @@
+#!/usr/bin/env zsh
+
+PLUGIN_DIRECTORY=${0:A:h}
+SCRIPT_NAME=$(basename "$0")
+
+##### PreRequisits: Check for OpenSSL #####
+if ! (( $+commands[openssl] )); then
+    echo "WARNING: 'openssl' command not found. Please install."
+    return
+fi
+
+source $PLUGIN_DIRECTORY/../lib/functions.zsh
+
+parseArguments "$*"
+
+[[ -z "$PASSPHRASE" ]] && PASSPHRASE=$OCRYPT_PASSPHRASE
+
+if [[ "$OPERATION" == "encrypt" ]]; then
+	echo "$INPUT" | openssl enc -base64 -e -aes-256-cbc -salt -pass pass:$PASSPHRASE -pbkdf2
+elif [[ "$OPERATION" == "decrypt" ]]; then
+	echo "$INPUT" | openssl enc -base64 -d -aes-256-cbc -salt -pass pass:$PASSPHRASE -pbkdf2
+fi
